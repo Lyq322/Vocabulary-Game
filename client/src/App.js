@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ChakraProvider, Flex } from '@chakra-ui/react'
 import NavBar from './NavBar';
 import HomePage from './HomePage';
+import StudentLoginPage from './StudentLoginPage';
+import AdminLoginPage from './AdminLoginPage';
 
 function App() {
   return (
@@ -12,6 +14,8 @@ function App() {
           <NavBar />
           <Routes>
             <Route path='/' element={<HomePage />} />
+            <Route path='/student-login' element={<StudentLoginPage />} />
+            <Route path='/admin-login' element={<AdminLoginPage />} />
           </Routes>
         </Flex>
       </Router>
