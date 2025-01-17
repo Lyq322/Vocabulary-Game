@@ -122,7 +122,7 @@ const StudentHome = () => {
           <Heading size='md'>Matching Game</Heading>
           <Button maxW={24} w='full' colorScheme='blue' size='sm' onClick={() => navigate('/matching')}>Start!</Button>
         </Flex>
-        <Center w='full' mt={8}>
+        <Center w='full' mt={5}>
           <SimpleGrid columns={2} rowGap={2} columnGap={24} w='full'>
             <MatchingCard word='bird' />
             <MatchingCard word='食物' />
