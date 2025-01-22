@@ -37,14 +37,14 @@ app.get('/current-user', (req, res) => {
 });
 
 app.get('/words/matching', (req, res) => {
-  const words = [
-    { 'bird': '鸟' },
-    { 'cat': '猫' },
-    { 'food': '食物' },
-    { 'happy': '快乐' },
-    { 'fly': '飞' },
-    { 'fall': '秋天' }
-  ];
+  const words = {
+    'bird': '鸟',
+    'cat': '猫',
+    'food': '食物',
+    'happy': '快乐',
+    'fly': '飞',
+    'fall': '秋天' 
+  };
 
   res.status(200).json(words);
 });
