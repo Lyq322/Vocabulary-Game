@@ -1,15 +1,20 @@
 import { Box, Text, Link as ChakraLink } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 const NavBar = () => {
   const [homeUrl, setHomeUrl] = useState('/');
 
   useEffect(() => {
-    const pathname = window.location.pathname;
-    if (pathname === 'student-login' || pathname === 'admin-login') {
+    const pathname = window.location.pathname.substring(1);
+    console.log('window.location.pathname', pathname)
+    if (pathname === 'student-home' || pathname === 'student-dashboard' || pathname === 'hangman' || pathname === 'matching' || pathname === 'word-search') {
+      setHomeUrl('/student-home');
+    } else if (pathname === 'admin-dashboard' || pathname === 'student-details') {
+      setHomeUrl('/admin-dashboard');
+    } else {
       setHomeUrl('/');
-    } else if (pathname === 'student-home' || pathname === 'student-dashboard' || pathname === 'hangman' || pathname === 'matching' || pathname === 'word-search')
+    }
   }, [window.location.pathname]);
 
   return (

@@ -10,6 +10,7 @@ import HangmanPage from './HangmanPage';
 import WordSearchPage from './WordSearchPage';
 import MatchingPage from './MatchingPage';
 import StudentDashboardPage from './StudentDashboardPage';
+import AdminDashboardPage from './AdminDashboardPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path='/hangman' element={<HangmanPage />} />
             <Route path='/word-search' element={<WordSearchPage />} />
             <Route path='/matching' element={<MatchingPage />} />
+            <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
           </Routes>
         </Flex>
       </Router>
