@@ -11,6 +11,7 @@ import WordSearchPage from './WordSearchPage';
 import MatchingPage from './MatchingPage';
 import StudentDashboardPage from './StudentDashboardPage';
 import AdminDashboardPage from './AdminDashboardPage';
+import AdminSignUpPage from './AdminSignUpPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path='/' element={<HomePage />} />
             <Route path='/student-login' element={<StudentLoginPage />} />
             <Route path='/admin-login' element={<AdminLoginPage />} />
+            <Route path='/admin-signup' element={<AdminSignUpPage />} />
             <Route path='/student-home' element={<StudentHome />} />
             <Route path='/student-dashboard' element={<StudentDashboardPage />} />
             <Route path='/hangman' element={<HangmanPage />} />
