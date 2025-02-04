@@ -33,59 +33,51 @@ const StudentHome = () => {
   }
 
   return (
-    <SimpleGrid columns={2} px={6} py={4} gap={8} maxW='container.lg' w='full' mx='auto'>
-      <Box 
-        borderWidth='1px' 
-        borderColor='blue.700' 
-        borderRadius='xl'
-        px={8}
-        pt={6}
-        pb={8}
-      >
-        <Flex direction='row' justify='space-between'>
-          <Heading size='md'>Dashboard</Heading>
-          <Button maxW={24} w='full' colorScheme='blue' size='sm' bg='blue.700' onClick={() => navigate('/student-dashboard')}>Go!</Button>
-        </Flex>
-        <Stack direction='row' h='200px' align='center' justify='center' w='full'>
-          <Pie data={data} options={options} />
-          <Icon as={GoPersonFill} h='100px' w='100px' color='blue.700' />
-        </Stack>
-      </Box>
-      <Box 
-        borderWidth='1px' 
-        borderColor='green.500' 
-        borderRadius='xl'
-        px={8}
-        pt={6}
-        pb={8}
-      >
-        <Flex direction='row' justify='space-between'>
-          <Heading size='md'>Hangman Game</Heading>
-          <Button maxW={24} w='full' colorScheme='green' size='sm' onClick={() => navigate('/hangman')}>Start!</Button>
-        </Flex>
-        <Center>
-          <svg width='200' height='200' viewBox='0 0 200 220'>
-            {/* Gallows */}
-            <line x1='40' y1='20' x2='142' y2='20' stroke='#38A169' strokeWidth='4' />
-            <line x1='140' y1='20' x2='140' y2='50' stroke='#38A169' strokeWidth='4' />
-            <line x1='40' y1='18' x2='40' y2='210' stroke='#38A169' strokeWidth='4' />
-            <line x1='0' y1='210' x2='80' y2='210' stroke='#38A169' strokeWidth='4' />
-
-            {/* Head */}
-            <circle cx='140' cy='70' r='20' stroke='#38A169' strokeWidth='4' fill='none' />
-
-            {/* Body */}
-            <line x1='140' y1='90' x2='140' y2='150' stroke='#38A169' strokeWidth='4' />
-
-            {/* Arms */}
-            <line x1='170' y1='120' x2='110' y2='120' stroke='#38A169' strokeWidth='4' />
-
-            {/* Legs */}
-            <line x1='140' y1='150' x2='120' y2='180' stroke='#38A169' strokeWidth='4' />
-            <line x1='140' y1='150' x2='160' y2='180' stroke='#38A169' strokeWidth='4' />
-          </svg>
-        </Center>
-      </Box>
+    <Stack px={6} py={4} gap={8} maxW='container.lg' w='full' mx='auto'>
+      <Flex gap={8} align='stretch'>
+        <Box 
+          borderWidth='1px' 
+          borderColor='blue.300' 
+          borderRadius='xl'
+          px={8}
+          pt={6}
+          pb={8}
+          w='50%'
+        >
+          <Flex direction='row' justify='space-between'>
+            <Heading size='md'>Dashboard</Heading>
+            <Button maxW={24} w='full' colorScheme='blue' size='sm' bg='blue.500' onClick={() => navigate('/student-dashboard')}>Go!</Button>
+          </Flex>
+          <Stack direction='row' h='200px' align='center' justify='center' w='full'>
+            <Pie data={data} options={options} />
+            <Icon as={GoPersonFill} h='100px' w='100px' color='blue.500' />
+          </Stack>
+        </Box>
+        <Box 
+          borderWidth='1px' 
+          borderColor='green.300' 
+          borderRadius='xl'
+          px={8}
+          pt={6}
+          pb={8}
+          w='50%'
+        >
+          <Flex direction='row' justify='space-between'>
+            <Heading size='md'>Matching Game</Heading>
+            <Button maxW={24} w='full' colorScheme='green' size='sm' onClick={() => navigate('/matching')}>Start!</Button>
+          </Flex>
+          <Center w='full' mt={5}>
+            <SimpleGrid columns={2} rowGap={2} columnGap={24} w='full'>
+              <MatchingCard word='bird' />
+              <MatchingCard word='食物' />
+              <MatchingCard word='food' />
+              <MatchingCard word='猫' />
+              <MatchingCard word='cat' />
+              <MatchingCard word='鸟' />
+            </SimpleGrid>
+          </Center>
+        </Box>
+      </Flex>
       <Box 
         borderWidth='1px' 
         borderColor='red.500' 
@@ -93,6 +85,8 @@ const StudentHome = () => {
         px={8}
         pt={6}
         pb={8}
+        w='calc(50% - 1em)'
+        mx='auto'
       >
         <Flex direction='row' justify='space-between'>
           <Heading size='md'>Word Search Game</Heading>
@@ -110,30 +104,7 @@ const StudentHome = () => {
           </Stack>
         </Center>
       </Box>
-      <Box 
-        borderWidth='1px' 
-        borderColor='blue.300' 
-        borderRadius='xl'
-        px={8}
-        pt={6}
-        pb={8}
-      >
-        <Flex direction='row' justify='space-between'>
-          <Heading size='md'>Matching Game</Heading>
-          <Button maxW={24} w='full' colorScheme='blue' size='sm' onClick={() => navigate('/matching')}>Start!</Button>
-        </Flex>
-        <Center w='full' mt={5}>
-          <SimpleGrid columns={2} rowGap={2} columnGap={24} w='full'>
-            <MatchingCard word='bird' />
-            <MatchingCard word='食物' />
-            <MatchingCard word='food' />
-            <MatchingCard word='猫' />
-            <MatchingCard word='cat' />
-            <MatchingCard word='鸟' />
-          </SimpleGrid>
-        </Center>
-      </Box>
-    </SimpleGrid>
+    </Stack>
   );
 };
 
