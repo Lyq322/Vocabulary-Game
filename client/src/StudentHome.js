@@ -30,7 +30,7 @@ const StudentHome = () => {
         enabled: false
       }
     }
-  }
+  };
 
   return (
     <Stack px={6} py={4} gap={8} maxW='container.lg' w='full' mx='auto'>

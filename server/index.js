@@ -49,6 +49,56 @@ app.get('/words/matching', (req, res) => {
   res.status(200).json(words);
 });
 
+app.get('/students', (req, res) => {
+  const students = [
+    { userId: 1, name: 'First1 Last1', words: {
+      'Known': {
+        'bird': '鸟',
+        'cat': '猫'
+      },
+      'Still Learning': {
+        'food': '食物',
+        'happy': '快乐'
+      },
+      'Have not Seen Yet': {
+        'fly': '飞',
+        'fall': '秋天'
+      }
+    }},
+    { userId: 2, name: 'First2 Last2', words: {
+      'Known': {
+        'bird': '鸟',
+        'cat': '猫',
+        'food': '食物',
+        'happy': '快乐',
+        'fly': '飞',
+        'fall': '秋天'
+      },
+      'Still Learning': {},
+      'Have not Seen Yet': {}
+    }},
+    { userId: 3, name: 'First3 Last3', words: {
+      'Known': {},
+      'Still Learning': {},
+      'Have not Seen Yet': {
+        'bird': '鸟',
+        'cat': '猫',
+        'food': '食物',
+        'happy': '快乐',
+        'fly': '飞',
+        'fall': '秋天'
+      }
+    }}
+  ];
+
+  res.status(200).json(students);
+});
+
+app.post('/create-student', (req, res) => {
+  const { name, email, password } = req.body;
+  res.status(200);
+});
+
 app.listen(port, () => {
   console.log(`server has started on port ${port}`);
 });
