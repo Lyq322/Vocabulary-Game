@@ -52,7 +52,7 @@ const MatchingPage = () => {
     <Box px={8} py={6} maxW='container.lg' w='full' mx='auto'>
       <Flex direction='row' justify='space-between'>
         <Heading size='lg'>Matching!</Heading>
-        <InstructionsButtonModal instructions='blah blah' color='blue' />
+        <InstructionsButtonModal instructions='Match the English words with their corresponding Chinese translations. Click on a card to select it, then click on another card to find its match. If the cards match, they will disappear. Complete the game by matching all the pairs!' color='green' />
       </Flex>
       <SimpleGrid columns={3} mt={12} gap={4}>
         {Object.keys(words).map((englishWord, index) => {

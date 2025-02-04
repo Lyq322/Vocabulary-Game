@@ -4,13 +4,13 @@ import React from 'react';
 const MatchingCard = ({ word, handleClickCard, clicked }) => {
   return (
     <Center 
-      bg='blue.100' 
+      bg='green.100' 
       px={4} 
       py={4} 
       w='full' 
       borderRadius='md' 
       borderWidth={clicked ? '3px' : '1px'} 
-      borderColor='blue.500' 
+      borderColor='green.500' 
       onClick={handleClickCard}
       boxSizing='border-box'
       cursor='pointer'
