@@ -89,7 +89,7 @@ const WordSearchPage = () => {
           console.log('foundWords', [...foundWords, word.toLowerCase()])
           setHighlightedLetters((prev) => [...prev, ...newHighlightedLetters]);
           setSelectedLetter('');
-          if (foundWords.length === words.length) {
+          if (foundWords.length + 1 === words.length) {
             onOpen();
           }
         } else {
