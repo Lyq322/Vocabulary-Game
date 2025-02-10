@@ -196,6 +196,26 @@ app.post('/create-student', (req, res) => {
   res.status(200);
 });
 
+app.get('/students/:id/words', (req, res) => {
+  const id = req.params.id;
+  const words = {
+    'Known': {
+      'bird': '鸟',
+      'cat': '猫',
+      'happy': '快乐'
+    },
+    'Still Learning': {
+      'food': '食物'
+    },
+    'Have not Seen Yet': {
+      'fly': '飞',
+      'fall': '秋天'
+    }
+  };
+
+  res.status(200).json(words);
+});
+
 app.listen(port, () => {
   console.log(`server has started on port ${port}`);
 });

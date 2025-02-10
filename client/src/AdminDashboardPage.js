@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { SERVER_HOST } from './config';
 import { Pie } from 'react-chartjs-2';
-import { Chart, LineElement, PointElement, ArcElement, LinearScale, Title, Tooltip, Legend, CategoryScale, plugins } from 'chart.js';
+import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
