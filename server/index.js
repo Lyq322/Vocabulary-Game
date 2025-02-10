@@ -49,6 +49,103 @@ app.get('/words/matching', (req, res) => {
   res.status(200).json(words);
 });
 
+app.get('/words/word-search', (req, res) => {
+  const words = {
+    'Still Learning': {
+      'bird': '鸟',
+      'cat': '猫',
+      'food': '食物',
+      'happy': '快乐',
+      'fly': '飞'
+    },
+    'Have not Seen Yet': {
+      'fall': '秋天'
+    }
+  };
+
+  const DIRECTIONS = ['left', 'right', 'up', 'down', 'leftUp', 'rightUp', 'leftDown', 'rightDown'];
+
+  const GRID_SIZE = 10;
+  let grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+  let possibleWords = [...Object.keys(words['Still Learning']), ...Object.keys(words['Have not Seen Yet'])];
+
+  // Select up to 6 random words
+  let selectedWords = [];
+  while (possibleWords.length > 0 && selectedWords.length < 6) {
+    let randomIndex = Math.floor(Math.random() * possibleWords.length);
+    selectedWords.push(possibleWords[randomIndex]);
+    possibleWords.splice(randomIndex, 1);
+  }
+
+  // Place words in grid
+  for (let word of selectedWords) {
+    let placed = false;
+    while (!placed) {
+      let startRow = Math.floor(Math.random() * GRID_SIZE);
+      let startCol = Math.floor(Math.random() * GRID_SIZE);
+      let direction = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+
+      if (canPlaceWord(word, startRow, startCol, direction)) {
+        grid = placeWord(word, startRow, startCol, direction);
+        placed = true;
+      }
+    }
+  }
+
+  // Fill remaining spaces with random letters
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      if (grid[row][col] === null) {
+        grid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
+      }
+    }
+  }
+
+  // Helper function to check if word can be placed
+  function canPlaceWord(word, row, col, direction) {
+    const GRID_SIZE = 10;
+    let [dRow, dCol] = getDirectionOffsets(direction);
+
+    for (let i = 0; i < word.length; i++) {
+      if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE || (grid[row][col] !== null && grid[row][col] !== word[i])) {
+        return false;
+      }
+      row += dRow;
+      col += dCol;
+    }
+    return true;
+  }
+
+  // Helper function to place word in puzzle grid
+  function placeWord(word, row, col, direction) {
+    let [dRow, dCol] = getDirectionOffsets(direction);
+
+    for (let i = 0; i < word.length; i++) {
+      grid[row][col] = word[i].toUpperCase();
+      row += dRow;
+      col += dCol;
+    }
+    return grid;
+  }
+
+  // Helper function to get direction offsets
+  function getDirectionOffsets(direction) {
+    switch (direction) {
+      case 'left': return [0, -1];
+      case 'right': return [0, 1];
+      case 'up': return [-1, 0];
+      case 'down': return [1, 0];
+      case 'leftUp': return [-1, -1];
+      case 'rightUp': return [-1, 1];
+      case 'leftDown': return [1, -1];
+      case 'rightDown': return [1, 1];
+      default: return [0, 0];
+    }
+  }
+
+  res.status(200).json({'grid': grid, 'words': selectedWords});
+});
+
 app.get('/students', (req, res) => {
   const students = [
     { userId: 1, name: 'First1 Last1', words: {
