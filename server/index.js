@@ -28,8 +28,10 @@ const verifyToken = (req, res, next) => {
     if (err) {
       return res.status(500).json({ message: 'Failed to authenticate token' });
     }
+    console.log('decoded', decoded);
 
     req.userId = decoded.id;
+    req.email = decoded.email;
     next();
   });
 };
@@ -78,17 +80,149 @@ app.post('/admin-login', async (req, res) => {
   }
 });
 
-app.get('/words/matching', (req, res) => {
+app.get('/students', verifyToken, async (req, res) => {
+  const email = req.email;
+  console.log(email);
+
+  /*const students = [
+    { userId: 1, name: 'First1 Last1', words: {
+      'Known': {
+        'bird': '鸟',
+        'cat': '猫'
+      },
+      'Still Learning': {
+        'food': '食物',
+        'happy': '快乐'
+      },
+      'Have not Seen Yet': {
+        'fly': '飞',
+        'fall': '秋天'
+      }
+    }},
+    { userId: 2, name: 'First2 Last2', words: {
+      'Known': {
+        'bird': '鸟',
+        'cat': '猫',
+        'food': '食物',
+        'happy': '快乐',
+        'fly': '飞',
+        'fall': '秋天'
+      },
+      'Still Learning': {},
+      'Have not Seen Yet': {}
+    }},
+    { userId: 3, name: 'First3 Last3', words: {
+      'Known': {},
+      'Still Learning': {},
+      'Have not Seen Yet': {
+        'bird': '鸟',
+        'cat': '猫',
+        'food': '食物',
+        'happy': '快乐',
+        'fly': '飞',
+        'fall': '秋天'
+      }
+    }}
+  ];*/
+
+  try {
+    const classCodeResult = await pool.query('SELECT class_code FROM users WHERE email = $1', [email]);
+    const classCode = classCodeResult.rows[0].class_code;
+
+    const studentsResult = await pool.query('SELECT * FROM users WHERE class_code = $1 AND account_type = $2', [classCode, 'Student']);
+    const students = studentsResult.rows;
+
+    res.status(200).json(students);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get('/class-code', verifyToken, async (req, res) => {
+  const email = req.email;
+
+  try {
+    const classCodeResult = await pool.query('SELECT class_code FROM users WHERE email = $1', [email]);
+    const classCode = classCodeResult.rows[0].class_code;
+    res.status(200).json({ classCode });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/create-student', async (req, res) => {
+  const { name, email, password, classCode } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const accountExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (accountExists.rows.length > 0) {
+      return res.status(400).json({ message: 'An account with this email already exists' });
+    }
+
+    const newStudent = await pool.query('INSERT INTO users (name, email, password, account_type, class_code) VALUES ($1, $2, $3, $4, $5) RETURNING *', [name, email, hashedPassword, 'Student', classCode]);
+
+    res.status(200).json(newStudent.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/create-admin', async (req, res) => {
+  const { email, password, classCode } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const accountExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (accountExists.rows.length > 0) {
+      return res.status(400).json({ message: 'An account with this email already exists' });
+    }
+
+    const newAdmin = await pool.query('INSERT INTO users (email, password, account_type, class_code) VALUES ($1, $2, $3, $4) RETURNING *', [email, hashedPassword, 'Admin', classCode]);
+    
+    const token = jwt.sign({ id: newAdmin.rows[0].id, email: email }, SECRET_KEY, { expiresIn: '1h' });
+    res.status(200).json({ authenticated: true, token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json('Server error');
+  }
+});
+
+app.get('/students/:id/words', (req, res) => {
+  const id = req.params.id;
   const words = {
-    'bird': '鸟',
-    'cat': '猫',
-    'food': '食物',
-    'happy': '快乐',
-    'fly': '飞',
-    'fall': '秋天' 
+    'Known': {
+      'bird': '鸟',
+      'cat': '猫',
+      'happy': '快乐'
+    },
+    'Still Learning': {
+      'food': '食物'
+    },
+    'Have not Seen Yet': {
+      'fly': '飞',
+      'fall': '秋天'
+    }
   };
 
   res.status(200).json(words);
+});
+
+app.get('/words/matching', verifyToken, async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const allWords = await pool.query('SELECT * FROM words WHERE user_id = $1', [userId]);
+    
+    const matchingWords = {...allWords['Have not Seen Yet'], ...allWords['Still Learning']};
+    res.status(200).json(matchingWords);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.get('/words/word-search', (req, res) => {
@@ -186,84 +320,6 @@ app.get('/words/word-search', (req, res) => {
   }
 
   res.status(200).json({'grid': grid, 'words': selectedWords});
-});
-
-app.get('/students', (req, res) => {
-  const students = [
-    { userId: 1, name: 'First1 Last1', words: {
-      'Known': {
-        'bird': '鸟',
-        'cat': '猫'
-      },
-      'Still Learning': {
-        'food': '食物',
-        'happy': '快乐'
-      },
-      'Have not Seen Yet': {
-        'fly': '飞',
-        'fall': '秋天'
-      }
-    }},
-    { userId: 2, name: 'First2 Last2', words: {
-      'Known': {
-        'bird': '鸟',
-        'cat': '猫',
-        'food': '食物',
-        'happy': '快乐',
-        'fly': '飞',
-        'fall': '秋天'
-      },
-      'Still Learning': {},
-      'Have not Seen Yet': {}
-    }},
-    { userId: 3, name: 'First3 Last3', words: {
-      'Known': {},
-      'Still Learning': {},
-      'Have not Seen Yet': {
-        'bird': '鸟',
-        'cat': '猫',
-        'food': '食物',
-        'happy': '快乐',
-        'fly': '飞',
-        'fall': '秋天'
-      }
-    }}
-  ];
-
-  res.status(200).json(students);
-});
-
-app.post('/create-student', async (req, res) => {
-  const { name, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  try {
-    const newStudent = await pool.query('INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *', [name, email, hashedPassword]);
-    res.status(200).json(newStudent.rows[0]);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json('Server error');
-  }
-});
-
-app.get('/students/:id/words', (req, res) => {
-  const id = req.params.id;
-  const words = {
-    'Known': {
-      'bird': '鸟',
-      'cat': '猫',
-      'happy': '快乐'
-    },
-    'Still Learning': {
-      'food': '食物'
-    },
-    'Have not Seen Yet': {
-      'fly': '飞',
-      'fall': '秋天'
-    }
-  };
-
-  res.status(200).json(words);
 });
 
 app.listen(port, () => {

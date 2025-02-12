@@ -14,6 +14,8 @@ const AdminDashboardPage = () => {
   const [learning, setLearning] = useState(0);
   const [notSeen, setNotSeen] = useState(0);
 
+  const [code, setCode] = useState('');
+
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [studentPassword, setStudentPassword] = useState('');
@@ -22,7 +24,11 @@ const AdminDashboardPage = () => {
   const toast = useToast();
 
   useEffect(() => {
-    axios.get(`${SERVER_HOST}/students`)
+    axios.get(`${SERVER_HOST}/students`, {
+      headers: {
+        Authorization: localStorage.getItem('token')
+      }
+    })
       .then((res) => {
         setStudents(res.data);
 
@@ -76,9 +82,9 @@ const AdminDashboardPage = () => {
   };
 
   const handleCreateAccount = () => {
-    axios.post(`${SERVER_HOST}/create-student`, { name: studentName, email: studentEmail, password: studentPassword })
+    axios.post(`${SERVER_HOST}/create-student`, { name: studentName, email: studentEmail, password: studentPassword, classCode: code })
       .then((res) => {
-        console.log(res.data);
+        setStudents([...students, res.data]);
         onClose();
         toast({
           title: 'Success!',
@@ -86,11 +92,34 @@ const AdminDashboardPage = () => {
           status: 'success',
           duration: 9000,
           isClosable: true,
-        })
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+
+        toast({
+          title: 'Error',
+          description: err.response.data.message,
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+      });
+  };
+
+  const handleOpenModal = () => {
+    axios.get(`${SERVER_HOST}/class-code`, {
+      headers: {
+        Authorization: localStorage.getItem('token')
+      }
+    })
+      .then((res) => {
+        setCode(res.data.classCode);
       })
       .catch((err) => {
         console.error(err);
       });
+    onOpen();
   };
 
   return (
@@ -102,15 +131,23 @@ const AdminDashboardPage = () => {
             {students.map((student) => (
               <ChakraLink fontSize='lg' as={RouterLink} to={`/student-details/${student.userId}`} fontWeight='bold' textDecoration='underline' key={student.userId} target='_blank'>{student.name}</ChakraLink>
             ))}
+            {students.length === 0 && (
+              <Text fontSize='lg'>No students found.</Text>
+            )}
           </VStack>
           <VStack gap={0}>
             <Divider borderColor='blue.300' />
-            <Button onClick={onOpen} h='36px' size='lg' w='full' roundedTop='none' bg='blue.100' color='blue.500' _hover={{ bg: 'blue.300'  }}>+</Button>
+            <Button onClick={handleOpenModal} h='36px' size='lg' w='full' roundedTop='none' bg='blue.100' color='blue.500' _hover={{ bg: 'blue.300'  }}>+</Button>
           </VStack>
         </Flex>
-        <Box>
-          <Pie data={data} options={options} />
-        </Box>
+        {students.length > 0 && (known != 0 || learning != 0 || notSeen != 0) && (
+          <Box>
+            <Pie data={data} options={options} />
+          </Box>
+        )}
+        {students.length > 0 && (known === 0 && learning === 0 && notSeen === 0) && (
+          <Text fontSize='lg' ml={12}>No words found.</Text>
+        )}
       </Flex>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -118,7 +155,7 @@ const AdminDashboardPage = () => {
           <ModalHeader pb={0}>Create a New Student Account</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <Text color='gray.500' mb={3}>Class Code: PLACEHOLDER</Text>
+            <Text color='gray.500' mb={3}>Class Code: {code}</Text>
             <Input mb={2} placeholder='Student Name' value={studentName} onChange={(e) => setStudentName(e.target.value)} />
             <Input mb={2} type='email' placeholder='Student Email' value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} />
             <Input type='password' placeholder='Student Password' value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} />
