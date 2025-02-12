@@ -1,7 +1,12 @@
 const express = require('express')
 const app = express();
 const cors = require('cors');
+
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const bodyParser = require('body-parser');
+
+const pool = require('./db');
 
 const port = process.env.PORT || 5000;
 const SECRET_KEY = 'secretkey';
@@ -9,22 +14,14 @@ const SECRET_KEY = 'secretkey';
 app.use(cors());
 app.use(express.json());
 
-app.post('/student-login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    const token = jwt.sign({ id: 3, email: email }, SECRET_KEY, { expiresIn: '1h' });
-    res.status(200).json({ authenticated: true, token });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json('Server error');
-  }
-});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/current-user', (req, res) => {
-  const token = req.headers['x-access-token'];
+// Middleware to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
   if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(403).json({ message: 'No token provided' });
   }
 
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
@@ -32,8 +29,53 @@ app.get('/current-user', (req, res) => {
       return res.status(500).json({ message: 'Failed to authenticate token' });
     }
 
-    res.status(200).json({ id: decoded.id, email: decoded.email });
+    req.userId = decoded.id;
+    next();
   });
+};
+
+app.post('/student-login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ id: user_id, email: email }, SECRET_KEY, { expiresIn: '1h' });
+    res.status(200).json({ authenticated: true, token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/admin-login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ id: user.user_id, email: email }, SECRET_KEY, { expiresIn: '1h' });
+    res.status(200).json({ authenticated: true, token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.get('/words/matching', (req, res) => {
@@ -191,9 +233,17 @@ app.get('/students', (req, res) => {
   res.status(200).json(students);
 });
 
-app.post('/create-student', (req, res) => {
+app.post('/create-student', async (req, res) => {
   const { name, email, password } = req.body;
-  res.status(200);
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const newStudent = await pool.query('INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *', [name, email, hashedPassword]);
+    res.status(200).json(newStudent.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json('Server error');
+  }
 });
 
 app.get('/students/:id/words', (req, res) => {
