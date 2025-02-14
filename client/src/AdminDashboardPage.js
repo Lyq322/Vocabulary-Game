@@ -134,7 +134,7 @@ const AdminDashboardPage = () => {
         <Flex direction='column' justify='space-between' bg='blue.100' px={0} pt={6} rounded='lg' gap={0} h='50vh'>
           <VStack gap={3} px={12}>
             {students.map((student) => (
-              <ChakraLink fontSize='lg' as={RouterLink} to={`/student-details/${student.userId}`} fontWeight='bold' textDecoration='underline' key={student.userId} target='_blank'>{student.name}</ChakraLink>
+              <ChakraLink fontSize='lg' as={RouterLink} to={`/student-details/${student.user_id}`} fontWeight='bold' textDecoration='underline' key={student.userId} target='_blank'>{student.name}</ChakraLink>
             ))}
             {students.length === 0 && (
               <Text fontSize='lg'>No students found.</Text>
