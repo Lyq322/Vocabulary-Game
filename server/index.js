@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization'];
   if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
+    return res.status(401).json({ message: 'No token provided' });
   }
 
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
@@ -191,24 +191,74 @@ app.post('/create-admin', async (req, res) => {
   }
 });
 
-app.get('/students/:id/words', (req, res) => {
+app.get('/students/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
-  const words = {
-    'Known': {
-      'bird': '鸟',
-      'cat': '猫',
-      'happy': '快乐'
-    },
-    'Still Learning': {
-      'food': '食物'
-    },
-    'Have not Seen Yet': {
-      'fly': '飞',
-      'fall': '秋天'
-    }
-  };
 
-  res.status(200).json(words);
+  const student = await pool.query('SELECT * FROM users WHERE user_id = $1', [id]);
+  const records = await pool.query('SELECT * FROM game_records WHERE user_id = $1', [id]);
+
+  res.status(200).json({words: student.rows[0].words, records: records.rows, name: student.rows[0].name});
+});
+
+app.post('/add-word/:id', verifyToken, async (req, res) => {
+  const id = req.params.id;
+  var { englishWord, chineseWord } = req.body;
+  englishWord = englishWord.toLowerCase();
+
+  try {
+    const result = await pool.query('SELECT words FROM users WHERE user_id = $1', [id]);
+    var words = result.rows[0].words;
+
+    if (words && ((words['Known'] && words['Known'][englishWord]) || (words['Still Learning'] && words['Still Learning'][englishWord]) || (words['Have not Seen Yet'] && words['Have not Seen Yet'][englishWord]))) {
+      return res.status(400).json({ message: 'Word already exists' });
+    }
+
+    if (!words) {
+      words = {
+        'Known': {},
+        'Still Learning': {},
+        'Have not Seen Yet': {}
+      };
+    }
+    words['Have not Seen Yet'][englishWord] = chineseWord;
+    await pool.query('UPDATE users SET words = $1 WHERE user_id = $2', [words, id]);
+
+    res.status(200).json({ words });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/delete-word/:id', verifyToken, async (req, res) => {
+  const id = req.params.id;
+  const { word } = req.body;
+
+  try {
+    const result = await pool.query('SELECT words FROM users WHERE user_id = $1', [id]);
+    var words = result.rows[0].words;
+
+    if (!words || (!words['Known'] && !words['Still Learning'] && !words['Have not Seen Yet']) || (!words['Known'][word] && !words['Still Learning'][word] && !words['Have not Seen Yet'][word])) {
+      return res.status(400).json({ message: 'Word does not exist' });
+    }
+
+    if (words['Known'] && words['Known'][word]) {
+      delete words['Known'][word];
+    }
+    if (words['Still Learning'] && words['Still Learning'][word]) {
+      delete words['Still Learning'][word];
+    }
+    if (words['Have not Seen Yet'] && words['Have not Seen Yet'][word]) {
+      delete words['Have not Seen Yet'][word];
+    }
+    
+    await pool.query('UPDATE users SET words = $1 WHERE user_id = $2', [words, id]);
+
+    res.status(200).json({ words });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.get('/words/matching', verifyToken, async (req, res) => {
