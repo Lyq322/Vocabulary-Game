@@ -39,7 +39,7 @@ const verifyToken = (req, res, next) => {
 app.post('/student-login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND account_type = $2', [email, 'Student']);
     if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -50,7 +50,7 @@ app.post('/student-login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ id: user_id, email: email }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.user_id, email: email }, SECRET_KEY, { expiresIn: '1h' });
     res.status(200).json({ authenticated: true, token });
   } catch (err) {
     console.error(err.message);

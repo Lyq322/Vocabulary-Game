@@ -11,10 +11,11 @@ const StudentLoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogIn = () => {
+  const handleLogin = () => {
     axios.post(`${SERVER_HOST}/student-login`, { email, password })
-      .then((res) => {
-        if (res.data.authenticated) {
+      .then(response => {
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
           navigate('/student-home');
         } else {
           setError('Invalid email or password.');
@@ -22,18 +23,19 @@ const StudentLoginPage = () => {
       })
       .catch((err) => {
         console.error(err);
+        setError(err.response.data.message);
       });
-  }
+  };
 
   return (
     <Center h='calc(100vh - 48px)'>
       <Stack w='lg' direction='column' align='center' justify='center' px={10} py={8} bg='blue.100' mx='auto' borderRadius='lg'>
         <Heading size='lg' textAlign='center' mb={5}>Student Log In</Heading>
-        <Input bg='gray.100' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Input bg='gray.100' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
-        <Button colorScheme='blue' w='full' mt={2} onClick={handleLogIn}>Log In</Button>
+        <Input bg='gray.100' placeholder='Email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input bg='gray.100' placeholder='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Button colorScheme='blue' w='full' mt={2} onClick={handleLogin}>Log In</Button>
         {error !== '' && (
-          <Alert type='error'>
+          <Alert status='error'>
             <AlertIcon />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
