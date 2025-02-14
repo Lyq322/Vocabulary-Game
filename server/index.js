@@ -251,7 +251,7 @@ app.post('/delete-word/:id', verifyToken, async (req, res) => {
     if (words['Have not Seen Yet'] && words['Have not Seen Yet'][word]) {
       delete words['Have not Seen Yet'][word];
     }
-    
+
     await pool.query('UPDATE users SET words = $1 WHERE user_id = $2', [words, id]);
 
     res.status(200).json({ words });
@@ -370,6 +370,18 @@ app.get('/words/word-search', (req, res) => {
   }
 
   res.status(200).json({'grid': grid, 'words': selectedWords});
+});
+
+app.get('/user', verifyToken, async (req, res) => {
+  const email = req.email;
+
+  try {
+    const user = await pool.query('SELECT account_type FROM users WHERE email = $1', [email]);
+    res.status(200).json(user.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.listen(port, () => {
