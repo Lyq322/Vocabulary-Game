@@ -61,7 +61,7 @@ app.post('/student-login', async (req, res) => {
 app.post('/admin-login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND account_type = $2', [email, 'Admin']);
     if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
