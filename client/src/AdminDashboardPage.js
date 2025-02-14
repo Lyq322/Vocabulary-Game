@@ -38,9 +38,26 @@ const AdminDashboardPage = () => {
         var newLearning = 0;
         var newNotSeen = 0;
         for (const student of res.data) {
-          newKnown += Object.keys(student.words['Known']).length;
-          newLearning += Object.keys(student.words['Still Learning']).length;
-          newNotSeen += Object.keys(student.words['Have not Seen Yet']).length;
+          var words = student.words;
+          if (!words) {
+            words = {
+              'Known': {},
+              'Still Learning': {},
+              'Have not Seen Yet': {}
+            };
+          }
+          if (!words['Known']) {
+            words['Known'] = {};
+          }
+          if (!words['Still Learning']) {
+            words['Still Learning'] = {};
+          }
+          if (!words['Have not Seen Yet']) {
+            words['Have not Seen Yet'] = {};
+          }
+          newKnown += Object.keys(words['Known']).length;
+          newLearning += Object.keys(words['Still Learning']).length;
+          newNotSeen += Object.keys(words['Have not Seen Yet']).length;
         }
         setKnown(newKnown);
         setLearning(newLearning);
@@ -62,9 +79,9 @@ const AdminDashboardPage = () => {
           notSeen
         ],
         backgroundColor: [
-          'rgba(255, 99, 132)',
+          'rgba(75, 192, 192)',
           'rgba(54, 162, 235)',
-          'rgba(75, 192, 192)'
+          'rgba(255, 99, 132)'
         ]
       },
     ],
