@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, Stack, Link as ChakraLink, VStack, Divider, Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Input, Text, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { SERVER_HOST } from './config';
 import { Pie } from 'react-chartjs-2';
@@ -9,6 +9,8 @@ import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 Chart.register(ArcElement, Tooltip, Legend);
 
 const AdminDashboardPage = () => {
+  const navigate = useNavigate();
+
   const [students, setStudents] = useState([]);
   const [known, setKnown] = useState(0);
   const [learning, setLearning] = useState(0);
@@ -117,6 +119,9 @@ const AdminDashboardPage = () => {
         setCode(res.data.classCode);
       })
       .catch((err) => {
+        if (err.response.status === 401) {
+          navigate('/admin-login');
+        }
         console.error(err);
       });
     onOpen();
