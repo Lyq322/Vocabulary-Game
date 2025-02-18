@@ -13,7 +13,12 @@ const MatchingPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    axios.get(`${SERVER_HOST}/words/matching`)
+    const token = localStorage.getItem('token');
+    axios.get(`${SERVER_HOST}/matching-words`, {
+      headers: {
+        Authorization: token,
+      },
+    })  
       .then((response) => {
         setWords(response.data);
         console.log('response.data', response.data)

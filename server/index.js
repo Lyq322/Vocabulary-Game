@@ -232,21 +232,28 @@ app.post('/delete-word/:id', verifyToken, async (req, res) => {
   }
 });
 
-app.get('/words/matching', verifyToken, async (req, res) => {
-  const userId = req.userId;
-
+app.get('/matching-words', verifyToken, async (req, res) => {
+  const email = req.email;
   try {
-    const allWords = await pool.query('SELECT * FROM words WHERE user_id = $1', [userId]);
+    const allWords = await pool.query('SELECT words FROM users WHERE email = $1', [email]);
     
-    const matchingWords = {...allWords['Have not Seen Yet'], ...allWords['Still Learning']};
-    res.status(200).json(matchingWords);
+    const matchingWords = {...allWords.rows[0].words['Have not Seen Yet'], ...allWords.rows[0].words['Still Learning']};
+    
+    const selectedWords = {};
+    const allWordsArray = Object.keys(matchingWords);
+    while (allWordsArray.length > 0 && Object.keys(selectedWords).length < 6) {
+      const randomIndex = Math.floor(Math.random() * allWordsArray.length);
+      selectedWords[allWordsArray[randomIndex]] = matchingWords[allWordsArray[randomIndex]];
+      allWordsArray.splice(randomIndex, 1);
+    }
+    res.status(200).json(selectedWords);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-app.get('/words/word-search', (req, res) => {
+app.get('/word-search-words', (req, res) => {
   const words = {
     'Still Learning': {
       'bird': '鸟',
@@ -347,7 +354,7 @@ app.get('/user', verifyToken, async (req, res) => {
   const email = req.email;
 
   try {
-    const user = await pool.query('SELECT account_type FROM users WHERE email = $1', [email]);
+    const user = await pool.query('SELECT account_type, name FROM users WHERE email = $1', [email]);
     res.status(200).json(user.rows[0]);
   } catch (err) {
     console.error(err.message);
