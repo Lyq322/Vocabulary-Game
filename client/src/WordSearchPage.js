@@ -6,6 +6,10 @@ import InstructionsButtonModal from './InstructionsButtonModal';
 
 const WordSearchPage = () => {
   const [words, setWords] = useState([]);
+  
+  const [learning, setLearning] = useState(0);
+  const [notSeen, setNotSeen] = useState(0);
+
   const [foundWords, setFoundWords] = useState([]);
   const [grid, setGrid] = useState([]);
   const [highlightedLetters, setHighlightedLetters] = useState([]);
@@ -25,6 +29,8 @@ const WordSearchPage = () => {
       .then((response) => {
         setGrid(response.data.grid);
         setWords(response.data.words);
+        setLearning(response.data.learning);
+        setNotSeen(response.data.notSeen);
       })
       .catch((error) => {
         console.error('Error fetching data: ', error);
@@ -87,14 +93,32 @@ const WordSearchPage = () => {
           word = word.split('').reverse().join('');
         }
 
-        console.log('word', word);
-
         if (Object.keys(words).includes(word.toLowerCase())) {
           setFoundWords((prev) => [...prev, word.toLowerCase()]);
           setHighlightedLetters((prev) => [...prev, ...newHighlightedLetters]);
           setSelectedLetter('');
           if (foundWords.length + 1 === Object.keys(words).length) {
             onOpen();
+
+            const token = localStorage.getItem('token');
+            axios.post(`${SERVER_HOST}/completed-game`, {
+              words_changed: {
+                'Known': learning,
+                'Learning': notSeen,
+              },
+              words,
+              game: 'word search'
+            }, {
+              headers: {
+                Authorization: token,
+              },
+            })
+              .then((response) => {
+                console.log('Game records updated');
+              })
+              .catch((error) => {
+                console.error('Error updating game records: ', error);
+              });
           }
         } else {
           setSelectedLetter('');

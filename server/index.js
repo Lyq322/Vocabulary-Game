@@ -269,18 +269,18 @@ app.get('/word-search-words', verifyToken, async (req, res) => {
   const userId = req.userId;
 
   try {
-    let allWords = await pool.query('SELECT words FROM users WHERE user_id = $1', [userId]);
-    
-    allWords = {...allWords.rows[0].words['Have not Seen Yet'], ...allWords.rows[0].words['Still Learning']};
+    const allWords = await pool.query('SELECT words FROM users WHERE user_id = $1', [userId]);
+    console.log('allWords', allWords.rows[0].words);
+    const searchWords = {...allWords.rows[0].words['Have not Seen Yet'], ...allWords.rows[0].words['Still Learning']};
     
     const selectedWords = {};
-    const allWordsArray = Object.keys(allWords);
+    const allWordsArray = Object.keys(searchWords);
     var learning = 0;
     var notSeen = 0;
     while (allWordsArray.length > 0 && Object.keys(selectedWords).length < 6) {
       const randomIndex = Math.floor(Math.random() * allWordsArray.length);
-      selectedWords[allWordsArray[randomIndex]] = allWords[allWordsArray[randomIndex]];
-      if (allWords['Still Learning'] && allWords['Still Learning'][allWordsArray[randomIndex]]) {
+      selectedWords[allWordsArray[randomIndex]] = searchWords[allWordsArray[randomIndex]];
+      if (allWords.rows[0].words['Still Learning'] && allWords.rows[0].words['Still Learning'][allWordsArray[randomIndex]]) {
         learning++;
       } else {
         notSeen++;
@@ -361,7 +361,7 @@ app.get('/word-search-words', verifyToken, async (req, res) => {
       }
     }
 
-    res.status(200).json({'grid': grid, 'words': selectedWords});
+    res.status(200).json({'grid': grid, 'words': selectedWords, learning, notSeen});
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Server error' });
