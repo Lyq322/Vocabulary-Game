@@ -265,101 +265,107 @@ app.get('/matching-words', verifyToken, async (req, res) => {
   }
 });
 
-app.get('/word-search-words', (req, res) => {
-  const words = {
-    'Still Learning': {
-      'bird': '鸟',
-      'cat': '猫',
-      'food': '食物',
-      'happy': '快乐',
-      'fly': '飞'
-    },
-    'Have not Seen Yet': {
-      'fall': '秋天'
-    }
-  };
+app.get('/word-search-words', verifyToken, async (req, res) => {
+  const userId = req.userId;
 
-  const DIRECTIONS = ['left', 'right', 'up', 'down', 'leftUp', 'rightUp', 'leftDown', 'rightDown'];
-
-  const GRID_SIZE = 10;
-  let grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
-  let possibleWords = [...Object.keys(words['Still Learning']), ...Object.keys(words['Have not Seen Yet'])];
-
-  // Select up to 6 random words
-  let selectedWords = [];
-  while (possibleWords.length > 0 && selectedWords.length < 6) {
-    let randomIndex = Math.floor(Math.random() * possibleWords.length);
-    selectedWords.push(possibleWords[randomIndex]);
-    possibleWords.splice(randomIndex, 1);
-  }
-
-  // Place words in grid
-  for (let word of selectedWords) {
-    let placed = false;
-    while (!placed) {
-      let startRow = Math.floor(Math.random() * GRID_SIZE);
-      let startCol = Math.floor(Math.random() * GRID_SIZE);
-      let direction = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
-
-      if (canPlaceWord(word, startRow, startCol, direction)) {
-        grid = placeWord(word, startRow, startCol, direction);
-        placed = true;
+  try {
+    let allWords = await pool.query('SELECT words FROM users WHERE user_id = $1', [userId]);
+    
+    allWords = {...allWords.rows[0].words['Have not Seen Yet'], ...allWords.rows[0].words['Still Learning']};
+    
+    const selectedWords = {};
+    const allWordsArray = Object.keys(allWords);
+    var learning = 0;
+    var notSeen = 0;
+    while (allWordsArray.length > 0 && Object.keys(selectedWords).length < 6) {
+      const randomIndex = Math.floor(Math.random() * allWordsArray.length);
+      selectedWords[allWordsArray[randomIndex]] = allWords[allWordsArray[randomIndex]];
+      if (allWords['Still Learning'] && allWords['Still Learning'][allWordsArray[randomIndex]]) {
+        learning++;
+      } else {
+        notSeen++;
       }
+      allWordsArray.splice(randomIndex, 1);
     }
-  }
 
-  // Fill remaining spaces with random letters
-  for (let row = 0; row < GRID_SIZE; row++) {
-    for (let col = 0; col < GRID_SIZE; col++) {
-      if (grid[row][col] === null) {
-        grid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
-      }
-    }
-  }
+    console.log('selectedWords', selectedWords)
 
-  // Helper function to check if word can be placed
-  function canPlaceWord(word, row, col, direction) {
+    const DIRECTIONS = ['left', 'right', 'up', 'down', 'leftUp', 'rightUp', 'leftDown', 'rightDown'];
+
     const GRID_SIZE = 10;
-    let [dRow, dCol] = getDirectionOffsets(direction);
+    let grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
 
-    for (let i = 0; i < word.length; i++) {
-      if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE || (grid[row][col] !== null && grid[row][col] !== word[i])) {
-        return false;
+    // Place words in grid
+    for (let word of Object.keys(selectedWords)) {
+      let placed = false;
+      while (!placed) {
+        let startRow = Math.floor(Math.random() * GRID_SIZE);
+        let startCol = Math.floor(Math.random() * GRID_SIZE);
+        let direction = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+
+        if (canPlaceWord(word, startRow, startCol, direction)) {
+          grid = placeWord(word, startRow, startCol, direction);
+          placed = true;
+        }
       }
-      row += dRow;
-      col += dCol;
     }
-    return true;
-  }
 
-  // Helper function to place word in puzzle grid
-  function placeWord(word, row, col, direction) {
-    let [dRow, dCol] = getDirectionOffsets(direction);
-
-    for (let i = 0; i < word.length; i++) {
-      grid[row][col] = word[i].toUpperCase();
-      row += dRow;
-      col += dCol;
+    // Fill remaining spaces with random letters
+    for (let row = 0; row < GRID_SIZE; row++) {
+      for (let col = 0; col < GRID_SIZE; col++) {
+        if (grid[row][col] === null) {
+          grid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
+        }
+      }
     }
-    return grid;
-  }
 
-  // Helper function to get direction offsets
-  function getDirectionOffsets(direction) {
-    switch (direction) {
-      case 'left': return [0, -1];
-      case 'right': return [0, 1];
-      case 'up': return [-1, 0];
-      case 'down': return [1, 0];
-      case 'leftUp': return [-1, -1];
-      case 'rightUp': return [-1, 1];
-      case 'leftDown': return [1, -1];
-      case 'rightDown': return [1, 1];
-      default: return [0, 0];
+    // Helper function to check if word can be placed
+    function canPlaceWord(word, row, col, direction) {
+      const GRID_SIZE = 10;
+      let [dRow, dCol] = getDirectionOffsets(direction);
+
+      for (let i = 0; i < word.length; i++) {
+        if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE || (grid[row][col] !== null && grid[row][col] !== word[i])) {
+          return false;
+        }
+        row += dRow;
+        col += dCol;
+      }
+      return true;
     }
-  }
 
-  res.status(200).json({'grid': grid, 'words': selectedWords});
+    // Helper function to place word in puzzle grid
+    function placeWord(word, row, col, direction) {
+      let [dRow, dCol] = getDirectionOffsets(direction);
+
+      for (let i = 0; i < word.length; i++) {
+        grid[row][col] = word[i].toUpperCase();
+        row += dRow;
+        col += dCol;
+      }
+      return grid;
+    }
+
+    // Helper function to get direction offsets
+    function getDirectionOffsets(direction) {
+      switch (direction) {
+        case 'left': return [0, -1];
+        case 'right': return [0, 1];
+        case 'up': return [-1, 0];
+        case 'down': return [1, 0];
+        case 'leftUp': return [-1, -1];
+        case 'rightUp': return [-1, 1];
+        case 'leftDown': return [1, -1];
+        case 'rightDown': return [1, 1];
+        default: return [0, 0];
+      }
+    }
+
+    res.status(200).json({'grid': grid, 'words': selectedWords});
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.post('/completed-game', verifyToken, async (req, res) => {

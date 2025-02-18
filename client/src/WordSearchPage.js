@@ -16,7 +16,12 @@ const WordSearchPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    axios.get(`${SERVER_HOST}/words/word-search`)
+    const token = localStorage.getItem('token');
+    axios.get(`${SERVER_HOST}/word-search-words`, {
+      headers: {
+        Authorization: token,
+      },
+    })
       .then((response) => {
         setGrid(response.data.grid);
         setWords(response.data.words);
@@ -84,12 +89,11 @@ const WordSearchPage = () => {
 
         console.log('word', word);
 
-        if (words.includes(word.toLowerCase())) {
+        if (Object.keys(words).includes(word.toLowerCase())) {
           setFoundWords((prev) => [...prev, word.toLowerCase()]);
-          console.log('foundWords', [...foundWords, word.toLowerCase()])
           setHighlightedLetters((prev) => [...prev, ...newHighlightedLetters]);
           setSelectedLetter('');
-          if (foundWords.length + 1 === words.length) {
+          if (foundWords.length + 1 === Object.keys(words).length) {
             onOpen();
           }
         } else {
@@ -136,12 +140,12 @@ const WordSearchPage = () => {
         </Box>
         <Flex direction='column' align='stretch' gap={6}>
           <Stack flexGrow={1} bg='red.100' rounded='lg' align='center' px={8} py={6}>
-            {words.map((word, index) => (
+            {Object.keys(words).map((word, index) => (
               <Box key={index} fontSize='lg' fontWeight={foundWords.includes(word) ? 'bold' : ''}>{word}</Box>
             ))}
           </Stack>
           <Box px={8} py={6} bg='red.100' rounded='lg' align='center'>
-            {foundWords.length} / {words.length} found
+            {foundWords.length} / {Object.keys(words).length} found
           </Box>
         </Flex>
       </Stack>
