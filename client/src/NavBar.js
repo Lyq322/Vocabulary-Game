@@ -11,6 +11,7 @@ const NavBar = () => {
   const [homeUrl, setHomeUrl] = useState('/');
 
   const [user, setUser] = useState('');
+  const [name, setName] = useState('');
 
   useEffect(() => {
     const pathname = window.location.pathname.substring(1);
@@ -32,6 +33,7 @@ const NavBar = () => {
     })
       .then(response => {
         setUser(response.data.account_type);
+        setName(response.data.name);
       })
       .catch(error => {
         if (error.response.status === 401) {
@@ -55,10 +57,12 @@ const NavBar = () => {
           </ChakraLink>
           {window.location.pathname !== '/' && window.location.pathname !== '/admin-login' && window.location.pathname !== '/student-login' && <Button size='sm' colorScheme='blue' onClick={handleLogOut}>Log Out</Button>}
         </Stack>
-        <Stack direction='row' gap={2} align='center'>
-          <Icon as={GoPersonFill} color='blue.600' h='20px' w='20px' />
-          <Text>{user}</Text>
-        </Stack>
+        {user && user !== '' && (
+          <Stack direction='row' gap={2} align='center'>
+            <Icon as={GoPersonFill} color='blue.600' h='20px' w='20px' />
+            <Text>{user === 'Student' ? name : user}</Text>
+          </Stack>
+        )}
       </Flex>
     </Box>
   );
