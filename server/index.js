@@ -84,47 +84,6 @@ app.get('/students', verifyToken, async (req, res) => {
   const email = req.email;
   console.log(email);
 
-  /*const students = [
-    { userId: 1, name: 'First1 Last1', words: {
-      'Known': {
-        'bird': '鸟',
-        'cat': '猫'
-      },
-      'Still Learning': {
-        'food': '食物',
-        'happy': '快乐'
-      },
-      'Have not Seen Yet': {
-        'fly': '飞',
-        'fall': '秋天'
-      }
-    }},
-    { userId: 2, name: 'First2 Last2', words: {
-      'Known': {
-        'bird': '鸟',
-        'cat': '猫',
-        'food': '食物',
-        'happy': '快乐',
-        'fly': '飞',
-        'fall': '秋天'
-      },
-      'Still Learning': {},
-      'Have not Seen Yet': {}
-    }},
-    { userId: 3, name: 'First3 Last3', words: {
-      'Known': {},
-      'Still Learning': {},
-      'Have not Seen Yet': {
-        'bird': '鸟',
-        'cat': '猫',
-        'food': '食物',
-        'happy': '快乐',
-        'fly': '飞',
-        'fall': '秋天'
-      }
-    }}
-  ];*/
-
   try {
     const classCodeResult = await pool.query('SELECT class_code FROM users WHERE email = $1', [email]);
     const classCode = classCodeResult.rows[0].class_code;
@@ -133,6 +92,27 @@ app.get('/students', verifyToken, async (req, res) => {
     const students = studentsResult.rows;
 
     res.status(200).json(students);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get('/students/:id', verifyToken, async (req, res) => {
+  const id = req.params.id;
+
+  const student = await pool.query('SELECT * FROM users WHERE user_id = $1', [id]);
+  const records = await pool.query('SELECT * FROM game_records WHERE user_id = $1', [id]);
+
+  res.status(200).json({words: student.rows[0].words, records: records.rows, name: student.rows[0].name});
+});
+
+app.get('/student', verifyToken, async (req, res) => {
+  const email = req.email;
+
+  try {
+    const student = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    res.status(200).json({words: student.rows[0].words, name: student.rows[0].name});
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Server error' });
@@ -189,15 +169,6 @@ app.post('/create-admin', async (req, res) => {
     console.error(err.message);
     res.status(500).json('Server error');
   }
-});
-
-app.get('/students/:id', verifyToken, async (req, res) => {
-  const id = req.params.id;
-
-  const student = await pool.query('SELECT * FROM users WHERE user_id = $1', [id]);
-  const records = await pool.query('SELECT * FROM game_records WHERE user_id = $1', [id]);
-
-  res.status(200).json({words: student.rows[0].words, records: records.rows, name: student.rows[0].name});
 });
 
 app.post('/add-word/:id', verifyToken, async (req, res) => {
