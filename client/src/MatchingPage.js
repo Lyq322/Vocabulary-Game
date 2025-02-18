@@ -7,6 +7,10 @@ import InstructionsButtonModal from './InstructionsButtonModal';
 
 const MatchingPage = () => {
   const [words, setWords] = useState({});
+  
+  const [learning, setLearning] = useState(0);
+  const [notSeen, setNotSeen] = useState(0);
+
   const [clickedCard, setClickedCard] = useState();
   const [displayedWords, setDisplayedWords] = useState(null);
   
@@ -20,11 +24,13 @@ const MatchingPage = () => {
       },
     })  
       .then((response) => {
-        setWords(response.data);
-        console.log('response.data', response.data)
+        setWords(response.data.words);
+        setLearning(response.data.learning);
+        setNotSeen(response.data.notSeen);
+
         const newDisplayedWords = []
-        for (var word of Object.keys(response.data)) {
-          newDisplayedWords.push(response.data[word]);
+        for (var word of Object.keys(response.data.words)) {
+          newDisplayedWords.push(response.data.words[word]);
           newDisplayedWords.push(word);
         }
         setDisplayedWords(newDisplayedWords);
@@ -38,6 +44,25 @@ const MatchingPage = () => {
   useEffect(() => {
     if (displayedWords && displayedWords.length === 0) {
       onOpen();
+      const token = localStorage.getItem('token');
+      axios.post(`${SERVER_HOST}/completed-game`, {
+        words_changed: {
+          'Known': learning,
+          'Learning': notSeen,
+        },
+        words,
+        game: 'matching'
+      }, {
+        headers: {
+          Authorization: token,
+        },
+      })
+        .then((response) => {
+          console.log('Game records updated');
+        })
+        .catch((error) => {
+          console.error('Error updating game records: ', error);
+        });
     }
   }, [displayedWords]);
 
@@ -51,11 +76,11 @@ const MatchingPage = () => {
     } else {
       setClickedCard(word);
     }
-  }
+  };
 
   return (
     <Box px={8} py={6} maxW='container.lg' w='full' mx='auto'>
-      <Flex direction='row' justify='space-between'>
+      <Flex direction='row' justify='space-between' mt={10}>
         <Heading size='lg'>Matching!</Heading>
         <InstructionsButtonModal instructions='Match the English words with their corresponding Chinese translations. Click on a card to select it, then click on another card to find its match. If the cards match, they will disappear. Complete the game by matching all the pairs!' color='green' />
       </Flex>

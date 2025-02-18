@@ -191,6 +191,11 @@ app.post('/add-word/:id', verifyToken, async (req, res) => {
         'Have not Seen Yet': {}
       };
     }
+
+    if (!words['Have not Seen Yet']) {
+      words['Have not Seen Yet'] = {};
+    }
+    console.log('words', words);
     words['Have not Seen Yet'][englishWord] = chineseWord;
     await pool.query('UPDATE users SET words = $1 WHERE user_id = $2', [words, id]);
 
@@ -241,12 +246,19 @@ app.get('/matching-words', verifyToken, async (req, res) => {
     
     const selectedWords = {};
     const allWordsArray = Object.keys(matchingWords);
+    var learning = 0;
+    var notSeen = 0;
     while (allWordsArray.length > 0 && Object.keys(selectedWords).length < 6) {
       const randomIndex = Math.floor(Math.random() * allWordsArray.length);
       selectedWords[allWordsArray[randomIndex]] = matchingWords[allWordsArray[randomIndex]];
+      if (allWords.rows[0].words['Still Learning'] && allWords.rows[0].words['Still Learning'][allWordsArray[randomIndex]]) {
+        learning++;
+      } else {
+        notSeen++;
+      }
       allWordsArray.splice(randomIndex, 1);
     }
-    res.status(200).json(selectedWords);
+    res.status(200).json({words: selectedWords, learning, notSeen});
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Server error' });
@@ -348,6 +360,49 @@ app.get('/word-search-words', (req, res) => {
   }
 
   res.status(200).json({'grid': grid, 'words': selectedWords});
+});
+
+app.post('/completed-game', verifyToken, async (req, res) => {
+  const userId = req.userId;
+  console.log('userId', userId);
+  const { words: newWords, words_changed, game } = req.body;
+
+  try {
+    await pool.query('INSERT INTO game_records (user_id, game, words_changed) VALUES ($1, $2, $3)', [userId, game, words_changed]);
+    
+    let oldWords = await pool.query('SELECT words FROM users WHERE user_id = $1', [userId]);
+    oldWords = oldWords.rows[0].words;
+
+    if (!oldWords['Still Learning']) {
+      oldWords['Still Learning'] = {};
+    }
+    if (!oldWords['Known']) {
+      oldWords['Known'] = {};
+    }
+
+    // Move words from 'Still Learning' to 'Known'
+    for (const word in oldWords['Still Learning']) {
+      if (newWords[word]) {
+        oldWords['Known'][word] = oldWords['Still Learning'][word];
+        delete oldWords['Still Learning'][word];
+      }
+    }
+
+    // Move words from 'Have not Seen Yet' to 'Still Learning'
+    for (const word in oldWords['Have not Seen Yet']) {
+      if (newWords[word]) {
+        oldWords['Still Learning'][word] = oldWords['Have not Seen Yet'][word];
+        delete oldWords['Have not Seen Yet'][word];
+      }
+    }
+
+    await pool.query('UPDATE users SET words = $1 WHERE user_id = $2', [oldWords, userId]);
+
+    res.status(200).json({ message: 'Game records and words updated' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.get('/user', verifyToken, async (req, res) => {

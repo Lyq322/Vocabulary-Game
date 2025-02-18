@@ -102,13 +102,15 @@ const StudentDetailsPage = () => {
     })
       .then(response => {
         setWords(response.data.words);
-        setKnown(Object.keys(response.data.words['Known']).length);
-        setLearning(Object.keys(response.data.words['Still Learning']).length);
-        setNotSeen(Object.keys(response.data.words['Have not Seen Yet']).length);
+        setKnown(Object.keys(response.data.words['Known'] || {}).length);
+        setLearning(Object.keys(response.data.words['Still Learning'] || {}).length);
+        setNotSeen(Object.keys(response.data.words['Have not Seen Yet'] || {}).length);
         setEnglishWord('');
         setChineseWord('');
+        console.log('no error??')
       })
       .catch(error => {
+        console.log(error.response);
         if (error.response.status === 401) {
           navigate('/admin-login');
         }
