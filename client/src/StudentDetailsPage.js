@@ -142,6 +142,20 @@ const StudentDetailsPage = () => {
       });
   };
 
+  const formatDateTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: true,
+    };
+    return date.toLocaleString('en-US', options);
+  };
+
   return (
     <Stack px={6} py={4} gap={8} maxW='container.lg' w='full' mx='auto' align='center' h='90vh'>
       <Heading size='lg' mt={10}>
@@ -162,10 +176,16 @@ const StudentDetailsPage = () => {
           )}
           <Box rounded='xl' w='full' borderWidth={1} borderColor='blue.100' px={8} py={6} flexGrow={1}>
             <Text fontSize='lg' fontWeight='semibold'>Recent Activity</Text>
-            <Stack>
-              {records.map(record => (
-                <Text key={record.id}>{record.createdAt}: {record.word}</Text>
-              ))}
+            <Stack pl={4} mt={3} pr={8}>
+              <ul>
+                {records.map(record => (
+                  <li key={record.id}>
+                    <Text>
+                      {record.game}: +<Box as='span'>{record.words_changed['Known']}</Box> known, +{record.words_changed['Still Learning']} still learning @ {formatDateTime(record.time)}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
             </Stack>
             {records.length === 0 && (
               <Center h='full' mt={-8}>No recent activity.</Center>

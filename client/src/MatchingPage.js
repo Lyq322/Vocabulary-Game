@@ -48,10 +48,10 @@ const MatchingPage = () => {
       axios.post(`${SERVER_HOST}/completed-game`, {
         words_changed: {
           'Known': learning,
-          'Learning': notSeen,
+          'Still Learning': notSeen,
         },
         words,
-        game: 'matching'
+        game: 'Matching'
       }, {
         headers: {
           Authorization: token,

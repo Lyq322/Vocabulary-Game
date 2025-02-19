@@ -104,10 +104,10 @@ const WordSearchPage = () => {
             axios.post(`${SERVER_HOST}/completed-game`, {
               words_changed: {
                 'Known': learning,
-                'Learning': notSeen,
+                'Still Learning': notSeen,
               },
               words,
-              game: 'word search'
+              game: 'Word search'
             }, {
               headers: {
                 Authorization: token,
