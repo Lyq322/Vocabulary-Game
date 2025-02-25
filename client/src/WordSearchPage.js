@@ -4,7 +4,7 @@ import { SERVER_HOST } from './config';
 import { Box, Flex, Heading, Modal, ModalBody, ModalContent, ModalHeader, ModalOverlay, Stack, useDisclosure } from '@chakra-ui/react';
 import InstructionsButtonModal from './InstructionsButtonModal';
 
-const WordSearchPage = () => {
+const WordSearchPage = ({ language }) => {
   const [words, setWords] = useState([]);
   
   const [learning, setLearning] = useState(0);
@@ -132,8 +132,13 @@ const WordSearchPage = () => {
   return (
     <Box px={8} py={6} maxW='container.lg' w='full' mx='auto'>
       <Flex direction='row' justify='space-between'>
-        <Heading size='lg'>Word Search!</Heading>
-        <InstructionsButtonModal instructions='Find all the hidden words in the grid. Words can be placed horizontally, vertically, or diagonally.' color='red' />
+        <Heading size='lg'>{language === 'en' ? 'Word Search!' : '单词搜索'}</Heading>
+        <InstructionsButtonModal 
+          language={language}
+          zhInstructions='在网格中找到所有隐藏的单词。单词可以水平、垂直或对角放置。'
+          enInstructions='Find all the hidden words in the grid. Words can be placed horizontally, vertically, or diagonally.' 
+          color='red'
+        />
       </Flex>
       <Stack direction='row' mt={6} gap={6} justify='center'>
         <Box rounded='lg' borderWidth='1px' borderColor='red.500' p={4}>

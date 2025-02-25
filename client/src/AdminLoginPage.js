@@ -4,7 +4,7 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { SERVER_HOST } from './config';
 
-const AdminLoginPage = () => {
+const AdminLoginPage = ({ getUser }) => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -16,6 +16,7 @@ const AdminLoginPage = () => {
       .then(response => {
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
+          getUser();
           navigate('/admin-dashboard');
         } else {
           setError('Invalid email or password.');

@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom';
 
 Chart.register(ArcElement);
 
-const StudentHome = () => {
+const StudentHome = ({ language }) => {
+  console.log('StudentHome language:', language);
   const navigate = useNavigate();
 
   const data = {
@@ -45,8 +46,10 @@ const StudentHome = () => {
           w='50%'
         >
           <Flex direction='row' justify='space-between'>
-            <Heading size='md'>Dashboard</Heading>
-            <Button maxW={24} w='full' colorScheme='blue' size='sm' bg='blue.500' onClick={() => navigate('/student-dashboard')}>Go!</Button>
+            <Heading size='md'>{language === 'en' ? 'Dashboard' : '仪表板'}</Heading>
+            <Button maxW={24} w='full' colorScheme='blue' size='sm' bg='blue.500' onClick={() => navigate('/student-dashboard')}>
+              {language === 'en' ? 'Go!' : '出发!'}
+            </Button>
           </Flex>
           <Stack direction='row' h='200px' align='center' justify='center' w='full'>
             <Pie data={data} options={options} />
@@ -63,8 +66,12 @@ const StudentHome = () => {
           w='50%'
         >
           <Flex direction='row' justify='space-between'>
-            <Heading size='md'>Matching Game</Heading>
-            <Button maxW={24} w='full' colorScheme='green' size='sm' onClick={() => navigate('/matching')}>Start!</Button>
+            <Heading size='md'>
+              {language === 'en' ? 'Matching Game' : '匹配'}
+            </Heading>
+            <Button maxW={24} w='full' colorScheme='green' size='sm' onClick={() => navigate('/matching')}>
+              {language === 'en' ? 'Start!' : '开始!'}
+            </Button>
           </Flex>
           <Center w='full' mt={5}>
             <SimpleGrid columns={2} rowGap={2} columnGap={24} w='full'>
@@ -89,8 +96,12 @@ const StudentHome = () => {
         mx='auto'
       >
         <Flex direction='row' justify='space-between'>
-          <Heading size='md'>Word Search Game</Heading>
-          <Button maxW={24} w='full' colorScheme='red' size='sm' onClick={() => navigate('/word-search')}>Start!</Button>
+          <Heading size='md'>
+            {language === 'en' ? 'Word Search Game' : '单词搜索'}
+          </Heading>
+          <Button maxW={24} w='full' colorScheme='red' size='sm' onClick={() => navigate('/word-search')}>
+            {language === 'en' ? 'Start!' : '开始!'}
+          </Button>
         </Flex>
         <Center fontFamily='Courier New, Courier, monospace' mt={4}>
           <Stack gap={0} fontSize='lg' fontWeight='bold' color='red.500'>

@@ -4,7 +4,7 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { SERVER_HOST } from './config';
 
-const AdminSignUpPage = () => {
+const AdminSignUpPage = ({ getUser }) => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -48,6 +48,7 @@ const AdminSignUpPage = () => {
       .then((response) => {
         if (response.data.authenticated) {
           localStorage.setItem('token', response.data.token);
+          getUser();
           navigate('/admin-dashboard');
         } else {
           setError('Failed to create admin');

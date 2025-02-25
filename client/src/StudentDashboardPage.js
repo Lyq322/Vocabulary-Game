@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
-const StudentDashboardPage = () => {
+const StudentDashboardPage = ({ language }) => {
   const navigate = useNavigate();
 
   const [words, setWords] = useState({});
@@ -42,7 +42,7 @@ const StudentDashboardPage = () => {
   }, []);
 
   const data = {
-    labels: ['Known', 'Still Learning', 'Haven\'t Seen Yet'],
+    labels: language === 'en' ? ['Known', 'Still Learning', 'Haven\'t Seen Yet'] : ['已知', '还在学', '还没有看过'],
     datasets: [
       {
         data: [
@@ -77,7 +77,7 @@ const StudentDashboardPage = () => {
     <Stack px={6} py={4} gap={8} maxW='container.lg' w='full' mx='auto' align='center'>
       <Heading size='lg' mt={10} alignSelf='flex-start'>
         <Icon as={GoPersonFill} color='blue.500' verticalAlign='middle' mb={1} mr={2} />
-        {name}'s Progress!
+        {language === 'en' ? `${name}'s Progress!` : `${name}的进步!`}
       </Heading>
       <Stack direction='row' gap={12} align='center' w='full' justify='center'>
         {!(known === 0 && learning === 0 && notSeen === 0) && (
@@ -87,42 +87,62 @@ const StudentDashboardPage = () => {
         )}
         {(known === 0 && learning === 0 && notSeen === 0) && (
           <Center textAlign='center' bg='gray.100' p={8} borderRadius='full' h='200px' w='200px'>
-            No words have been assigned to this student yet.
+            {language === 'en' ? 'Please ask your teacher to assign you some words.' : '请向您的老师分配一些单词。'}
           </Center>
         )}
         <Box rounded='xl' borderColor='blue.100' borderWidth={1} px={8} py={6} w='50%'>
-          <Text fontWeight='semibold' fontSize='lg' mb={4}>Great Job!</Text>
-          <Text fontWeight='bold' color='green.500'>You already know {Object.keys(words['Known'] || {}).length} words!</Text>
-          <Text fontWeight='bold' color='blue.500'>You are still learning {Object.keys(words['Still Learning'] || {}).length} words!</Text>
-          <Text fontWeight='bold' color='red.500'>You haven't seen {Object.keys(words['Have not Seen Yet'] || {}).length} words yet!</Text>
+          <Text fontWeight='semibold' fontSize='lg' mb={4}>
+            {language === 'en' ? 'Great Job!' : '总结'}
+          </Text>
+          <Text fontWeight='bold' color='green.500'>
+            {language === 'en' ? `You already know ${known} words!` : `你已经知道${known}个单词!`}
+          </Text>
+          <Text fontWeight='bold' color='blue.500'>
+            {language === 'en' ? `You are still learning ${learning} words!` : `你还在学${learning}个单词!`}
+          </Text>
+          <Text fontWeight='bold' color='red.500'>
+            {language === 'en' ? `You haven't seen ${notSeen} words yet!` : `你还没有看过${notSeen}个单词!`}
+          </Text>
         </Box>
       </Stack>
       <SimpleGrid columns={3} w='full' gap={4}>
         <Stack align='center' gap={2} bg='red.100' rounded='lg' p={6} flexGrow={1}>
-          <Text fontSize='lg' mb={1}>Haven't seen yet...</Text>
+          <Text fontSize='lg' mb={1}>
+            {language === 'en' ? 'Haven\'t seen yet...' : '还没有看过...'}
+          </Text>
           {words['Have not Seen Yet'] && Object.keys(words['Have not Seen Yet']).map((word) => (
             <Text key={word} fontSize='md' fontWeight='bold' color='red.500'>{word}</Text>
           ))}
           {notSeen === 0 && (
-            <Text fontSize='md' fontWeight='bold' color='red.500'>No words to show.</Text>
+            <Text fontSize='md' fontWeight='bold' color='red.500'>
+              {language === 'en' ? 'No words to show.' : '没有单词可以显示。'}
+            </Text>
           )}
         </Stack>
         <Stack align='center' gap={2} bg='blue.100' rounded='lg' p={6} flexGrow={1}>
-          <Text fontSize='lg' mb={1}>Still learning...</Text>
+          <Text fontSize='lg' mb={1}>
+            {language === 'en' ? 'Still Learning...' : '还在学...'}
+          </Text>
           {words['Still Learning'] && Object.keys(words['Still Learning']).map((word) => (
             <Text key={word} fontSize='md' fontWeight='bold' color='blue.500'>{word}</Text>
           ))}
           {learning === 0 && (
-            <Text fontSize='md' fontWeight='bold' color='blue.500'>No words to show.</Text>
+            <Text fontSize='md' fontWeight='bold' color='blue.500'>
+              {language === 'en' ? 'No words to show.' : '没有单词可以显示。'}
+            </Text>
           )}
         </Stack>
         <Stack align='center' gap={2} bg='green.100' rounded='lg' p={6} flexGrow={1}>
-          <Text fontSize='lg' mb={1}>Known...</Text>
+          <Text fontSize='lg' mb={1}>
+            {language === 'en' ? 'Known...' : '已知...'}
+          </Text>
           {words['Known'] && Object.keys(words['Known']).map((word) => (
             <Text key={word} fontSize='md' fontWeight='bold' color='green.500'>{word}</Text>
           ))}
           {known === 0 && (
-            <Text fontSize='md' fontWeight='bold' color='green.500'>No words to show.</Text>
+            <Text fontSize='md' fontWeight='bold' color='green.500'>
+              {language === 'en' ? 'No words to show.' : '没有单词可以显示。'}
+            </Text>
           )}
         </Stack>
       </SimpleGrid>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { SERVER_HOST } from './config';
 import { useNavigate } from 'react-router-dom';
 
-const StudentLoginPage = () => {
+const StudentLoginPage = ({ getUser }) => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -16,6 +16,7 @@ const StudentLoginPage = () => {
       .then(response => {
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
+          getUser();
           navigate('/student-home');
         } else {
           setError('Invalid email or password.');

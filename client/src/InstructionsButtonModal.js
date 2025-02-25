@@ -1,7 +1,7 @@
 import { Button, Modal, ModalBody, ModalContent, ModalHeader, ModalOverlay, useDisclosure } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React from 'react';
 
-const InstructionsButtonModal = ({ color, instructions }) => {
+const InstructionsButtonModal = ({ language, color, zhInstructions, enInstructions }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -14,15 +14,15 @@ const InstructionsButtonModal = ({ color, instructions }) => {
         color={`${color}.500`}
         onClick={onOpen}
       >
-        INSTRUCTIONS
+        {language === 'en' ? 'INSTRUCTIONS' : '说明'}
       </Button>
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader pb={0}>Instructions</ModalHeader>
+          <ModalHeader pb={0}>{language === 'en' ? 'Instructions' : '说明'}</ModalHeader>
           <ModalBody pb={4}>
-            {instructions}
+            {language === 'en' ? enInstructions : zhInstructions}
           </ModalBody>
         </ModalContent>
       </Modal>
