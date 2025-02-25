@@ -27,14 +27,15 @@ const StudentDashboardPage = ({ language }) => {
       }
     })
       .then(response => {
-        setWords(response.data.words);
+        const newWords = response.data.words || {};
+        setWords(newWords);
         setName(response.data.name);
-        setKnown(Object.keys(response.data.words['Known'] || {}).length);
-        setLearning(Object.keys(response.data.words['Still Learning'] || {}).length);
-        setNotSeen(Object.keys(response.data.words['Have not Seen Yet'] || {}).length);
+        setKnown(Object.keys(newWords['Known'] || {}).length);
+        setLearning(Object.keys(newWords['Still Learning'] || {}).length);
+        setNotSeen(Object.keys(newWords['Have not Seen Yet'] || {}).length);
       })
       .catch(error => {
-        if (error.response.status === 401) {
+        if (error.response && error.response.status === 401) {
           navigate('/student-login');
         }
         console.error(error);

@@ -7,6 +7,7 @@ import InstructionsButtonModal from './InstructionsButtonModal';
 
 const MatchingPage = ({ language }) => {
   const [words, setWords] = useState({});
+  const [randomizedWords, setRandomizedWords] = useState([]);
   
   const [learning, setLearning] = useState(0);
   const [notSeen, setNotSeen] = useState(0);
@@ -35,6 +36,10 @@ const MatchingPage = ({ language }) => {
         }
         setDisplayedWords(newDisplayedWords);
         console.log('displayedWords', newDisplayedWords, !newDisplayedWords.includes('fall'))
+
+        let newRandomizedWords = [...Object.keys(response.data.words), ...Object.values(response.data.words)];
+        newRandomizedWords = newRandomizedWords.sort(() => Math.random() - 0.5);
+        setRandomizedWords(newRandomizedWords);
       })
       .catch((error) => {
         console.error('Error fetching data: ', error);
@@ -90,16 +95,11 @@ const MatchingPage = ({ language }) => {
         />
       </Flex>
       <SimpleGrid columns={3} mt={12} gap={4}>
-        {Object.keys(words).map((englishWord, index) => {
-          const chineseWord = words[englishWord];
-
+        {randomizedWords.map((word, index) => {
           return (
             <React.Fragment key={index}>
-              <Fade in={displayedWords.includes(englishWord)}>
-                <MatchingCard clicked={clickedCard === englishWord} key={`english-${index}`} word={englishWord} handleClickCard={() => handleClickCard(englishWord)} />
-              </Fade>
-              <Fade in={displayedWords.includes(chineseWord)}>
-                <MatchingCard clicked={clickedCard === chineseWord} key={`chinese-${index}`} word={chineseWord} handleClickCard={() => handleClickCard(chineseWord)} />
+              <Fade in={displayedWords.includes(word)}>
+                <MatchingCard clicked={clickedCard === word} word={word} handleClickCard={() => handleClickCard(word)} />
               </Fade>
             </React.Fragment>
           );
