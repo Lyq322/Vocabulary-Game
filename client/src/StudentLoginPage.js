@@ -1,4 +1,4 @@
-import { Center, Heading, Stack, Link as ChakraLink, Text, Flex, Divider, Input, Button, Alert, AlertIcon, AlertDescription } from '@chakra-ui/react';
+import { Center, Heading, Stack, Input, Button, Alert, AlertIcon, AlertDescription } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { SERVER_HOST } from './config';
