@@ -4,7 +4,7 @@ import axios from 'axios';
 import { SERVER_HOST } from './config';
 import { useNavigate } from 'react-router-dom';
 
-const StudentLoginPage = ({ getUser }) => {
+const StudentLoginPage = ({ getUser, language }) => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -31,10 +31,10 @@ const StudentLoginPage = ({ getUser }) => {
   return (
     <Center h='calc(100vh - 48px)'>
       <Stack w='lg' direction='column' align='center' justify='center' px={10} py={8} bg='blue.100' mx='auto' borderRadius='lg'>
-        <Heading size='lg' textAlign='center' mb={5}>Student Log In</Heading>
+        <Heading size='lg' textAlign='center' mb={5}>{language === 'en' ? 'Student Login' : '学生登录'}</Heading>
         <Input bg='gray.100' placeholder='Email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} />
         <Input bg='gray.100' placeholder='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
-        <Button colorScheme='blue' w='full' mt={2} onClick={handleLogin}>Log In</Button>
+        <Button colorScheme='blue' w='full' mt={2} onClick={handleLogin}>{language === 'en' ? 'Login' : '登录'}</Button>
         {error !== '' && (
           <Alert status='error'>
             <AlertIcon />
