@@ -27,7 +27,6 @@ const StudentDetailsPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Fetch the student's words from the server
     axios.get(`${SERVER_HOST}/students/${id}`, {
       headers: {
         Authorization: localStorage.getItem('token')

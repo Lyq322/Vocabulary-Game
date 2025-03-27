@@ -15,8 +15,6 @@ const WordSearchPage = ({ language }) => {
   const [highlightedLetters, setHighlightedLetters] = useState([]);
   const [selectedLetter, setSelectedLetter] = useState('');
 
-  console.log('words', words)
-
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {

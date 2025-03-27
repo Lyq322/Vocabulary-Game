@@ -104,7 +104,11 @@ app.get('/students/:id', verifyToken, async (req, res) => {
   const student = await pool.query('SELECT * FROM users WHERE user_id = $1', [id]);
   const records = await pool.query('SELECT * FROM game_records WHERE user_id = $1', [id]);
 
-  res.status(200).json({words: student.rows[0].words, records: records.rows, name: student.rows[0].name});
+  res.status(200).json({
+    words: student.rows[0].words, 
+    records: records.rows, 
+    name: student.rows[0].name
+  });
 });
 
 app.get('/student', verifyToken, async (req, res) => {
@@ -123,7 +127,10 @@ app.get('/class-code', verifyToken, async (req, res) => {
   const email = req.email;
 
   try {
-    const classCodeResult = await pool.query('SELECT class_code FROM users WHERE email = $1', [email]);
+    const classCodeResult = await pool.query(
+      'SELECT class_code FROM users WHERE email = $1', 
+      [email]
+    );
     const classCode = classCodeResult.rows[0].class_code;
     res.status(200).json({ classCode });
   } catch (err) {
@@ -211,10 +218,21 @@ app.post('/delete-word/:id', verifyToken, async (req, res) => {
   const { word } = req.body;
 
   try {
-    const result = await pool.query('SELECT words FROM users WHERE user_id = $1', [id]);
+    const result = await pool.query(
+      'SELECT words FROM users WHERE user_id = $1', 
+      [id]
+    );
     var words = result.rows[0].words;
 
-    if (!words || (!words['Known'] && !words['Still Learning'] && !words['Have not Seen Yet']) || (!words['Known'][word] && !words['Still Learning'][word] && !words['Have not Seen Yet'][word])) {
+    if (!words || (
+      !words['Known'] 
+      && !words['Still Learning'] 
+      && !words['Have not Seen Yet']
+    ) || (
+      !words['Known'][word] 
+      && !words['Still Learning'][word]
+      && !words['Have not Seen Yet'][word]
+    )) {
       return res.status(400).json({ message: 'Word does not exist' });
     }
 
@@ -228,7 +246,10 @@ app.post('/delete-word/:id', verifyToken, async (req, res) => {
       delete words['Have not Seen Yet'][word];
     }
 
-    await pool.query('UPDATE users SET words = $1 WHERE user_id = $2', [words, id]);
+    await pool.query(
+      'UPDATE users SET words = $1 WHERE user_id = $2', 
+      [words, id]
+    );
 
     res.status(200).json({ words });
   } catch (err) {
@@ -242,7 +263,10 @@ app.get('/matching-words', verifyToken, async (req, res) => {
   try {
     const allWords = await pool.query('SELECT words FROM users WHERE email = $1', [email]);
     
-    const matchingWords = {...allWords.rows[0].words['Have not Seen Yet'], ...allWords.rows[0].words['Still Learning']};
+    const matchingWords = {
+      ...allWords.rows[0].words['Have not Seen Yet'], 
+      ...allWords.rows[0].words['Still Learning']
+    };
     
     const selectedWords = {};
     const allWordsArray = Object.keys(matchingWords);
@@ -251,7 +275,8 @@ app.get('/matching-words', verifyToken, async (req, res) => {
     while (allWordsArray.length > 0 && Object.keys(selectedWords).length < 6) {
       const randomIndex = Math.floor(Math.random() * allWordsArray.length);
       selectedWords[allWordsArray[randomIndex]] = matchingWords[allWordsArray[randomIndex]];
-      if (allWords.rows[0].words['Still Learning'] && allWords.rows[0].words['Still Learning'][allWordsArray[randomIndex]]) {
+      if (allWords.rows[0].words['Still Learning'] 
+        && allWords.rows[0].words['Still Learning'][allWordsArray[randomIndex]]) {
         learning++;
       } else {
         notSeen++;

@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ChakraProvider, Flex } from '@chakra-ui/react'
 import NavBar from './NavBar';
 import HomePage from './HomePage';
@@ -43,10 +43,23 @@ function App() {
     <ChakraProvider>
       <Router>
         <Flex direction='column' justify='stretch' height='100%'>
-          <NavBar user={user} name={name} setUser={setUser} setName={setName} language={language} setLanguage={setLanguage} />
+          <NavBar 
+            user={user} 
+            name={name} 
+            setUser={setUser} 
+            setName={setName} 
+            language={language} 
+            setLanguage={setLanguage}
+          />
           <Routes>
-            <Route path='/' element={<HomePage language={language} />} />
-            <Route path='/student-login' element={<StudentLoginPage getUser={getUser} language={language} />} />
+            <Route 
+              path='/' 
+              element={<HomePage language={language} />}
+            />
+            <Route 
+              path='/student-login' 
+              element={<StudentLoginPage getUser={getUser} language={language} />}
+            />
             <Route path='/admin-login' element={<AdminLoginPage getUser={getUser} />} />
             <Route path='/admin-signup' element={<AdminSignUpPage getUser={getUser} />} />
             <Route path='/student-home' element={<StudentHomePage language={language} />} />

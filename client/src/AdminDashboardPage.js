@@ -101,7 +101,12 @@ const AdminDashboardPage = () => {
   };
 
   const handleCreateAccount = () => {
-    axios.post(`${SERVER_HOST}/create-student`, { name: studentName, email: studentEmail, password: studentPassword, classCode: code })
+    axios.post(`${SERVER_HOST}/create-student`, { 
+      name: studentName, 
+      email: studentEmail, 
+      password: studentPassword, 
+      classCode: code
+    })
       .then((res) => {
         setStudents([...students, res.data]);
         onClose();
@@ -114,8 +119,6 @@ const AdminDashboardPage = () => {
         });
       })
       .catch((err) => {
-        console.error(err);
-
         toast({
           title: 'Error',
           description: err.response.data.message,
